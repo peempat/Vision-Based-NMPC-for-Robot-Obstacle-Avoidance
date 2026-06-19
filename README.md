@@ -29,7 +29,6 @@ Bottles are detected by a webcam using **YOLOv8**, localized in 3-D via **ArUco 
 - [Usage](#usage)
 - [Baseline Comparison](#baseline-comparison)
 - [UR5e Parameters](#ur5e-parameters)
-- [Citation](#citation)
 
 ---
 
@@ -58,15 +57,6 @@ Bottles are detected by a webcam using **YOLOv8**, localized in 3-D via **ArUco 
 <div align="center">
   <img src="results/simulation_20260616_191222_sphere.gif" width="48%" alt="Sphere obstacle"/>
   <img src="results/trajectory_3d_20260616_191222_sphere.png" width="48%" alt="3D trajectory sphere"/>
-</div>
-
----
-
-### Camera Mode — Live YOLO + ArUco
-
-<div align="center">
-  <img src="results/simulation_20260617_024231_camera.gif" width="48%" alt="Camera mode"/>
-  <img src="results/trajectory_3d_20260617_024231_camera.png" width="48%" alt="3D trajectory camera"/>
 </div>
 
 ---
@@ -250,19 +240,6 @@ python main.py --mode compare
 | NMPC horizon | N = 10 × 0.05 s = 0.5 s |
 | Control rate | 5 Hz |
 | Physics timestep | 0.002 s (500 Hz) |
-
----
-
-## Citation
-
-```bibtex
-@mastersthesis{ur5e_nmpc_avoidance_2026,
-  title  = {Vision-Based Dynamic Obstacle Avoidance for UR5e
-            using YOLO, ArUco and Kinematic NMPC},
-  author = {Anuwit},
-  year   = {2026}
-}
-```
 
 ---
 
