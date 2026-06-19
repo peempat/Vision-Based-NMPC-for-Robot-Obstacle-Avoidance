@@ -242,7 +242,3 @@ python main.py --mode compare
 | Physics timestep | 0.002 s (500 Hz) |
 
 ---
-
-<div align="center">
-Made for Master's thesis research — Universal Robots UR5e · MuJoCo · CasADi · YOLOv8
-</div>
