@@ -1,0 +1,91 @@
+<mujoco model="ur5e sphere obstacle avoidance">
+  <include file="ur5e.xml"/>
+
+  <!--
+    Sphere-obstacle test scene.
+    The obstacle is a solid sphere (radius 0.10 m) placed at the midpoint
+    of the straight-line path from the home end-effector to the target.
+    The NMPC treats obstacles as spheres in its capsule-distance model,
+    so this scene gives the most faithful match between the visual and the
+    collision geometry used by the planner.
+
+    Home EE  ≈ (-0.13,  0.49,  0.49)
+    Target   =  (0.40,  0.00,  0.40)
+    Obstacle at t≈0.40: (0.09, 0.29, 0.44)
+
+    Exclusion zone shown: radius = obstacle_radius + safety_margin
+                                 = 0.10 + 0.10 = 0.20 m
+  -->
+  <statistic center="0.3 0 0.4" extent="0.9"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.15 0.15 0.15" specular="0 0 0"/>
+    <rgba haze="0.1 0.15 0.25 1"/>
+    <global azimuth="120" elevation="-20"/>
+  </visual>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.25 0.4 0.6" rgb2="0 0 0" width="512" height="3072"/>
+    <texture type="2d" name="groundplane" builtin="checker" mark="edge"
+      rgb1="0.25 0.32 0.42" rgb2="0.15 0.20 0.28" markrgb="0.7 0.7 0.7" width="300" height="300"/>
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.15"/>
+    <!-- Bright orange-red sphere obstacle -->
+    <material name="obstacle_mat" rgba="1.0 0.25 0.0 0.92"/>
+    <!-- Semi-transparent yellow safety bubble -->
+    <material name="safety_mat"   rgba="1.0 0.85 0.0 0.10"/>
+    <!-- Bright green target sphere -->
+    <material name="target_mat"   rgba="0.05 0.95 0.15 0.95"/>
+    <!-- Blue trajectory dots -->
+    <material name="traj_mat"     rgba="0.1  0.5  1.0  0.85"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0.3 0.2 1.5" dir="-0.1 -0.1 -1" directional="true"/>
+    <light pos="-0.5 0.5 1.0" dir="0.3 -0.3 -0.8" directional="true" diffuse="0.3 0.3 0.3"/>
+    <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
+
+    <!-- ── TARGET ── green sphere at [0.40, 0.00, 0.40] ── -->
+    <body name="target_body" mocap="true" pos="0.40 0.00 0.40">
+      <geom type="sphere" size="0.035" material="target_mat" contype="0" conaffinity="0"/>
+    </body>
+
+    <!-- ── SPHERE OBSTACLE ── radius 0.10 m, on path at t≈0.40 ── -->
+    <body name="obstacle_0" mocap="true" pos="0.09 0.29 0.44">
+      <!-- main sphere body (orange-red, 10 cm radius) -->
+      <geom type="sphere" size="0.10" material="obstacle_mat" contype="0" conaffinity="0"/>
+      <!-- semi-transparent safety zone (radius = 0.10 + 0.10 = 0.20 m) -->
+      <geom type="sphere" size="0.20" material="safety_mat"   contype="0" conaffinity="0"/>
+    </body>
+
+    <!-- Remaining obstacle slots parked far away -->
+    <body name="obstacle_1" mocap="true" pos="10 1 0">
+      <geom type="sphere" size="0.10" material="obstacle_mat" contype="0" conaffinity="0"/>
+      <geom type="sphere" size="0.20" material="safety_mat"   contype="0" conaffinity="0"/>
+    </body>
+    <body name="obstacle_2" mocap="true" pos="10 2 0">
+      <geom type="sphere" size="0.10" material="obstacle_mat" contype="0" conaffinity="0"/>
+      <geom type="sphere" size="0.20" material="safety_mat"   contype="0" conaffinity="0"/>
+    </body>
+    <body name="obstacle_3" mocap="true" pos="10 3 0">
+      <geom type="sphere" size="0.10" material="obstacle_mat" contype="0" conaffinity="0"/>
+      <geom type="sphere" size="0.20" material="safety_mat"   contype="0" conaffinity="0"/>
+    </body>
+    <body name="obstacle_4" mocap="true" pos="10 4 0">
+      <geom type="sphere" size="0.10" material="obstacle_mat" contype="0" conaffinity="0"/>
+      <geom type="sphere" size="0.20" material="safety_mat"   contype="0" conaffinity="0"/>
+    </body>
+
+    <!-- ── NMPC predicted trajectory dots (blue) ── -->
+    <site name="traj_0"  pos="0 0 0" size="0.016" rgba="0.1 0.5 1.0 0.9" group="4"/>
+    <site name="traj_1"  pos="0 0 0" size="0.016" rgba="0.1 0.5 1.0 0.9" group="4"/>
+    <site name="traj_2"  pos="0 0 0" size="0.016" rgba="0.1 0.5 1.0 0.9" group="4"/>
+    <site name="traj_3"  pos="0 0 0" size="0.016" rgba="0.1 0.5 1.0 0.9" group="4"/>
+    <site name="traj_4"  pos="0 0 0" size="0.016" rgba="0.1 0.5 1.0 0.9" group="4"/>
+    <site name="traj_5"  pos="0 0 0" size="0.016" rgba="0.1 0.5 1.0 0.9" group="4"/>
+    <site name="traj_6"  pos="0 0 0" size="0.016" rgba="0.1 0.5 1.0 0.9" group="4"/>
+    <site name="traj_7"  pos="0 0 0" size="0.016" rgba="0.1 0.5 1.0 0.9" group="4"/>
+    <site name="traj_8"  pos="0 0 0" size="0.016" rgba="0.1 0.5 1.0 0.9" group="4"/>
+    <site name="traj_9"  pos="0 0 0" size="0.016" rgba="0.1 0.5 1.0 0.9" group="4"/>
+    <site name="traj_10" pos="0 0 0" size="0.016" rgba="0.1 0.5 1.0 0.9" group="4"/>
+  </worldbody>
+</mujoco>
