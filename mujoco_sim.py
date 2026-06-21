@@ -252,8 +252,14 @@ class UR5eSimulation:
     def run(
         self,
         nmpc_controller,                # KinematicNMPC (or APF/RRT wrapper) instance
-        target_pos:    np.ndarray,      # (3,) world position
+        target_pos:    np.ndarray,      # (3,) world position — used as initial target
         obstacle_source=None,           # callable() → List[np.ndarray] (world pos)
+        target_source=None,             # callable() → np.ndarray — dynamic target; overrides target_pos each tick
+        initial_q:     Optional[np.ndarray] = None,  # override home joint config
+        viewer_azimuth:   float = 120,  # MuJoCo viewer camera azimuth [deg]
+        viewer_elevation: float = -20,  # MuJoCo viewer camera elevation [deg]
+        viewer_distance:  float = 1.8,  # MuJoCo viewer camera distance [m]
+        viewer_lookat:    Optional[np.ndarray] = None,  # MuJoCo viewer lookat [x,y,z]
         max_duration:  float = 60.0,    # seconds of active control
         goal_tol:      float = 0.02,    # [m] success threshold
         save_video:    bool  = True,    # capture offscreen frames for GIF
@@ -276,7 +282,9 @@ class UR5eSimulation:
         from ur5e_kinematics import min_clearance_numpy
         evaluator = EpisodeEvaluator()
 
-        self.reset()
+        _lookat = viewer_lookat if viewer_lookat is not None else np.array([0.3, 0.0, 0.4])
+
+        self.reset(q=initial_q)
         self.set_target_position(target_pos)
 
         ctrl_dt  = 1.0 / self.sim_cfg.control_freq
@@ -293,10 +301,10 @@ class UR5eSimulation:
                 renderer = mujoco.Renderer(self.model, height=480, width=640)
                 vcam = mujoco.MjvCamera()
                 mujoco.mjv_defaultCamera(vcam)
-                vcam.lookat[:] = [0.3, 0.0, 0.4]
-                vcam.distance   = 1.8
-                vcam.elevation  = -20
-                vcam.azimuth    = 120
+                vcam.lookat[:]  = _lookat
+                vcam.distance   = viewer_distance
+                vcam.elevation  = viewer_elevation
+                vcam.azimuth    = viewer_azimuth
                 print("[VIDEO] Offscreen renderer ready (640×480).")
             except Exception as exc:
                 print(f"[VIDEO] Renderer unavailable: {exc}")
@@ -314,10 +322,14 @@ class UR5eSimulation:
 
         # ── Shared control-tick logic ──────────────────────────────────────
         def _control_tick():
-            nonlocal obs_positions, obs_radii, q_dot_opt, q_cmd, goal_reached, goal_hold_t
+            nonlocal obs_positions, obs_radii, q_dot_opt, q_cmd, goal_reached, goal_hold_t, target_pos
 
             q, _      = self.get_robot_state()
             ee_pos, _ = self.compute_forward_kinematics()
+
+            if target_source is not None:
+                target_pos = target_source()
+                self.set_target_position(target_pos)
 
             if obstacle_source is not None:
                 raw_pos       = obstacle_source()
@@ -406,10 +418,10 @@ class UR5eSimulation:
                   f"Target = {np.round(target_pos, 3)}")
 
             with mujoco.viewer.launch_passive(self.model, self.data) as viewer:
-                viewer.cam.lookat[:] = [0.3, 0.0, 0.4]
-                viewer.cam.distance   = 1.8
-                viewer.cam.elevation  = -20
-                viewer.cam.azimuth    = 120
+                viewer.cam.lookat[:]  = _lookat
+                viewer.cam.distance   = viewer_distance
+                viewer.cam.elevation  = viewer_elevation
+                viewer.cam.azimuth    = viewer_azimuth
 
                 while viewer.is_running():
                     step_wall_start = time.perf_counter()

@@ -350,11 +350,21 @@ def run(cfg: DetectorConfig) -> None:
     prev_tick = time.perf_counter()
     fps = 0.0
 
+    frame_count = 0
     while True:
         ret, frame = cap.read()
         if not ret or frame is None:
             print("[WARNING] Failed to read frame. Retrying...")
             continue
+
+        frame = cv2.flip(frame, 1)  # mirror horizontally
+
+        frame_count += 1
+        # Debug: save first 3 frames to check if camera data is real
+        if frame_count <= 3:
+            cv2.imwrite(f"debug_frame_{frame_count}.jpg", frame)
+            print(f"[DEBUG] Frame {frame_count}: shape={frame.shape} dtype={frame.dtype} "
+                  f"min={frame.min()} max={frame.max()}")
 
         # --- YOLO bottle detection ---
         results = model.predict(
